@@ -1,14 +1,20 @@
-import  express  from 'express';
+import express from "express";
+import { connectDb } from "./db/db.js";
+import dotenv from "dotenv"
+
 
 const app = express();
-import noteRouter from './routes/notes.routes.js'
+const port=process.env.PORT || 3000
+dotenv.config()
 
 
-app.use('/api/notes/',noteRouter)
-app.listen(5001,()=>{
-    console.log("Hello sever started bcudicviduvciv");
-    
-})
+connectDb()
 
 
-// 
+import noteRouter from "./routes/notes.routes.js";
+
+app.use("/api/notes/", noteRouter);
+app.listen(port, () => {
+  console.log("Hello sever started on port",port);
+});
+
