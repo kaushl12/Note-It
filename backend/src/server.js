@@ -17,7 +17,6 @@ connectDb()
 
 import noteRouter from "./routes/notes.routes.js";
 import userRouter from "./routes/user.routes.js";
-import { cookieParser } from 'cookie-parser';
 
 app.use("/api/notes/", noteRouter);
 app.use("/api/user/", userRouter);

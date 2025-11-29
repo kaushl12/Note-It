@@ -5,20 +5,32 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 
-const generateRefreshAndAccessTokens = async (userId) => {
+export const generateRefreshAndAccessTokens = async (userId) => {
   try {
+    // Always extract only the ID
     const user = await User.findById(userId);
+
+    if (!user) {
+      throw new ApiError(404, "User not found while generating tokens");
+    }
+
+    // Generate tokens from user methods
     const accessToken = user.generateAccessToken();
     const refreshToken = user.generateRefreshToken();
 
-    user.refereshToken = refreshToken;
+    // Save refresh token in DB
+    user.refreshToken = refreshToken;
     await user.save({ validateBeforeSave: false });
 
     return { accessToken, refreshToken };
+
   } catch (error) {
+    console.error("Token Generation Error:", error);
+
     throw new ApiError(
       500,
-      "Something went wrong while generating Refresh and Access tokens"
+      "Something went wrong while generating Refresh and Access tokens",
+      error?.message
     );
   }
 };
@@ -78,43 +90,49 @@ export const register = asyncHandler(async (req, res) => {
 });
 
 export const login = asyncHandler(async (req, res) => {
-  const loginData = registerSchema.safeParse(body);
+  const loginData = registerSchema.safeParse(req.body);
+
   if (!loginData.success) {
-    return res.status(200).json({
+    return res.status(400).json({
       message: "Invalid Login data",
       error: loginData.error.issues,
     });
   }
+
   const { email, password } = loginData.data;
-  const isUserExists = await User.findOne({ email });
-  if (!isUserExists || (await isUserExists.isPasswordCorrect(password))) {
-    throw new ApiError(401, [], "Inavlid email or password");
+
+  const user = await User.findOne({ email });
+
+  // THIS IS CORRECT CHECK
+  if (!user || !(await user.isPasswordCorrect(password))) {
+    throw new ApiError(401, "Invalid email or password");
   }
 
-  const { accessToken, refereshToken } = await generateRefreshAndAccessTokens(
-    isUserExists._id
-  );
-  const loggedInUser = await User.findById(isUserExists._id).select(
+  const { accessToken, refreshToken } =
+    await generateRefreshAndAccessTokens(user);
+
+  const loggedInUser = await User.findById(user._id).select(
     "-password -refreshToken"
   );
 
-  const options={
-    httpOnly:true,
-    secure:true
-  }
-  return res.status(200)
-  .cookie("accessToken",accessToken,options)
-  .cookie("refreshToken",refereshToken,options)
-  .json(
-    new ApiResponse(
-      200,
-      {
-        user: loggedInUser,accessToken,refereshToken
-      },
-      "User Logged-In Successfully"
-    )
-  )
+  const options = {
+    httpOnly: true,
+    secure: true
+  };
+
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(
+      new ApiResponse(
+        200,
+        { user: loggedInUser, accessToken, refreshToken },
+        "User Logged-In Successfully"
+      )
+    );
 });
+
 export const logout =asyncHandler(async(req,res)=>{
 
   const userId=req.user._id;
