@@ -5,6 +5,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 
+
 export const generateRefreshAndAccessTokens = async (userId) => {
   try {
     // Always extract only the ID
@@ -153,3 +154,59 @@ export const logout =asyncHandler(async(req,res)=>{
   )
 
 })
+
+
+export const refreshAccessToken = asyncHandler(async (req, res) => {
+  const incomingRefreshToken =
+    req.cookies?.refreshToken || req.body?.refreshToken;
+
+  // 1. No refresh token -> unauthorized
+  if (!incomingRefreshToken) {
+    throw new ApiError(401, "Unauthorized request: Refresh token missing");
+  }
+
+  let decoded;
+  try {
+    decoded = jwt.verify(
+      incomingRefreshToken,
+      process.env.REFRESH_TOKEN_SECRET
+    );
+  } catch (err) {
+    throw new ApiError(401, "Refresh token is invalid or expired");
+  }
+
+  // 2. User must exist
+  const user = await User.findById(decoded?._id);
+  if (!user) {
+    throw new ApiError(401, "Refresh token does not match any user");
+  }
+
+  // 3. Token must match stored refresh token
+  if (incomingRefreshToken !== user.refreshToken) {
+    throw new ApiError(401, "Refresh token expired or already used");
+  }
+
+  // 4. Generate new tokens
+  const { accessToken, refreshToken } =
+    await generateRefreshAndAccessTokens(user._id);
+
+  // 5. Cookie options
+  const options = {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none", // for frontend working across domains
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  };
+
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(
+      new ApiResponse(
+        200,
+        { accessToken, refreshToken },
+        "Access token refreshed successfully"
+      )
+    );
+});
