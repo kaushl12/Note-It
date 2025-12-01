@@ -1,25 +1,24 @@
-import  mongoose,{Schema}  from 'mongoose';
+import mongoose, { Schema } from "mongoose";
 
-
-const noteSchema=new Schema({
-    title:{
-        type:String,
-        required:true,
-    trim: true,
-
+const noteSchema = new Schema(
+  {
+    title: {
+      type: String,
+      required: true,
+      trim: true,
     },
-    content:{
-        type:String,
-        required:true,
-    trim: true,
-
+    content: {
+      type: String,
+      required: true,
+      trim: true,
     },
-    user:{
-        type:Schema.Types.ObjectId,
-        required:true,
-        ref:"User"
-    }
+    user: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: "User",
+    },
+  },
+  { timestamps: true }
+);
 
-},{timestamps:true})
-
-export const Note=mongoose.model("Note",noteSchema)
+export const Note = mongoose.model("Note", noteSchema);
