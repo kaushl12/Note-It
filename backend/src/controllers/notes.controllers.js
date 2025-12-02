@@ -3,7 +3,7 @@ import { asyncHandler } from "../utils/asyncHandlers.js";
 import { ApiError } from "../utils/ApiError.js";
 import { Note } from "../models/notes.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 
 const notesSchema = z.object({
   title: z.string().trim().min(1, "Title is Required"),
@@ -36,7 +36,19 @@ export const createNotes = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, cleanNote, "Note Created Successfully"));
 });
 export const getAllNotes = asyncHandler(async (req, res) => {
-  res.send("Hello in all");
+  if(!req.user._id){
+    throw new ApiError(404,"Unauthorized Access")
+  }
+  const userId=req.user._id;
+  const allNotes=await Note.find({user:userId}).select("-__v").lean();
+  if(!allNotes){
+    throw new ApiError(401,"No notes Found!")
+  }
+  return res
+  .status(200)
+  .json(
+    new ApiResponse(200,allNotes,"Notes Fetched Successfully")
+  )
 });
 
 export const updateNotes = asyncHandler(async (req, res) => {
@@ -116,5 +128,28 @@ export const deleteNotes = asyncHandler(async (req, res) => {
   )
 });
 export const getNote = asyncHandler(async (req, res) => {
-  res.send("Hello in notes");
+  if(!req.user._id){
+    throw new ApiError(401,"Unauthorized Acess")
+  }
+  const userId = req.user._id;
+  const { noteId } = req.params;
+  if (!noteId) {
+    throw new ApiError(400, "Missing Note Id in request");
+  }
+  if (!mongoose.Types.ObjectId.isValid(noteId)) {
+    throw new ApiError(400, "Invalid Note Id");
+  }
+  const note=await Note.findOne(
+    {
+      _id:noteId,
+      user:userId
+    }
+  ).select("-__v")
+  .lean()
+  if(!note){
+    throw new ApiError(404,"Note not found")
+  }
+  return res
+  .status(200)
+  .json(new ApiResponse(200,note,"Note fetched successfully"))
 });
