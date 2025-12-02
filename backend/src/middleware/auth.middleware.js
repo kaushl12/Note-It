@@ -4,6 +4,8 @@ import { asyncHandler } from "../utils/asyncHandlers.js";
 import { User } from "../models/user.model.js";
 
 export const verifyJwt = asyncHandler(async (req, res, next) => {
+  console.log("Hello Going Through middleware");
+  
   const token =
     req.cookies?.accessToken ||
     req.headers.authorization?.replace("Bearer ", "").trim();

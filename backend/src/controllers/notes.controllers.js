@@ -40,9 +40,11 @@ export const getAllNotes = asyncHandler(async (req, res) => {
     throw new ApiError(404,"Unauthorized Access")
   }
   const userId=req.user._id;
-  const allNotes=await Note.find({user:userId}).select("-__v").lean();
-  if(!allNotes){
-    throw new ApiError(401,"No notes Found!")
+  const allNotes=await Note.find({user:userId}).select("-__v").sort({ createdAt: -1 }).lean();
+  if(allNotes.length===0){
+     return res.status(200).json(
+      new ApiResponse(200, [], "No notes found")
+    );
   }
   return res
   .status(200)
@@ -147,7 +149,7 @@ export const getNote = asyncHandler(async (req, res) => {
   ).select("-__v")
   .lean()
   if(!note){
-    throw new ApiError(404,"Note not found")
+    throw new ApiError(404,"Note not found or you don't have access to it")
   }
   return res
   .status(200)

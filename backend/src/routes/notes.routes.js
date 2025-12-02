@@ -3,9 +3,10 @@ import { createNotes, deleteNotes, getAllNotes, getNote, updateNotes } from "../
 import { verifyJwt } from "../middleware/auth.middleware.js";
 
 const router=Router();
-router.route('/create').post(verifyJwt,createNotes)
-router.route('/all').get(verifyJwt,getAllNotes)
-router.route('/update/:noteId').patch(verifyJwt,updateNotes)
-router.route('/delete/:noteId').delete(verifyJwt,deleteNotes)
-router.route('/get/:noteId').get(verifyJwt,getNote)
+router.use(verifyJwt)
+router.route('/create').post(createNotes)
+router.route('/all').get(getAllNotes)
+router.route('/update/:noteId').patch(updateNotes)
+router.route('/delete/:noteId').delete(deleteNotes)
+router.route('/get/:noteId').get(getNote)
 export default router;
