@@ -11,14 +11,21 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 
+app.use(rateLimit({
+  windowMs:60*1000,
+  max:100
+}));
+
 
 connectDb()
 
 
 import noteRouter from "./routes/notes.routes.js";
 import userRouter from "./routes/user.routes.js";
+import rateLimit from "express-rate-limit";
+import { noteLimiter } from "./middleware/rateLimiter.js";
 
-app.use("/api/notes/", noteRouter);
+app.use("/api/notes/",noteLimiter ,noteRouter);
 app.use("/api/user/", userRouter);
 
 
