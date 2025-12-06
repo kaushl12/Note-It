@@ -1,14 +1,25 @@
-import {Router} from "express"
-import { createNotes, deleteNotes, getAllNotes, getNote, updateNotes } from "../controllers/notes.controllers.js";
+import { Router } from "express";
+import { 
+  createNotes, 
+  deleteNotes, 
+  getAllNotes, 
+  getNote, 
+  updateNotes 
+} from "../controllers/notes.controllers.js";
+
 import { verifyJwt } from "../middleware/auth.middleware.js";
 import { noteLimiter } from "../middleware/rateLimiter.js";
 
-const router=Router();
-router.use(verifyJwt,noteLimiter);
+const router = Router();
 
-router.route('/create').post( createNotes)
-router.route('/all').get( getAllNotes)
-router.route('/update/:noteId').patch(updateNotes)
-router.route('/delete/:noteId').delete(deleteNotes)
-router.route('/get/:noteId').get(getNote)
+// Authenticate user first
+router.use(verifyJwt);
+
+// Apply limiter PER ROUTE (correct)
+router.route("/create").post(noteLimiter, createNotes);
+router.route("/all").get(noteLimiter, getAllNotes);
+router.route("/update/:noteId").patch(noteLimiter, updateNotes);
+router.route("/delete/:noteId").delete(noteLimiter, deleteNotes);
+router.route("/get/:noteId").get(noteLimiter, getNote);
+
 export default router;
