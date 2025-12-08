@@ -3,10 +3,12 @@ import { Route, Routes } from 'react-router'
 import HomePage from './pages/HomePage'
 import CreatePage from './pages/CreatePage'
 import NotedetailPage from './pages/NotedetailPage'
+import toast from 'react-hot-toast'
 
 const App = () => {
   return (
     <div>
+      <button onClick={()=>toast.error("Hello")} className="bg-red-900" >HIIIIIIIIIIIIIIIIIIIIIIIIII</button>
       <Routes>
         <Route path="/" element={<HomePage/>}/>
         <Route path="/create" element={<CreatePage/>}/>
