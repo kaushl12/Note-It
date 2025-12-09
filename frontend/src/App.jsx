@@ -7,8 +7,7 @@ import toast from 'react-hot-toast'
 
 const App = () => {
   return (
-    <div>
-      <button onClick={()=>toast.error("Hello")} className="bg-red-900" >HIIIIIIIIIIIIIIIIIIIIIIIIII</button>
+    <div data-theme="night">
       <Routes>
         <Route path="/" element={<HomePage/>}/>
         <Route path="/create" element={<CreatePage/>}/>
