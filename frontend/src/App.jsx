@@ -5,6 +5,7 @@ import CreatePage from './pages/CreatePage'
 import NotedetailPage from './pages/NotedetailPage'
 import toast from 'react-hot-toast'
 
+
 const App = () => {
   return (
     <div data-theme="night">
