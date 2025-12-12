@@ -2,7 +2,7 @@ import React from "react";
 
 const Input = ({ label, type = "text", value, onChange, placeholder }) => {
   return (
-    <div className="form-control w-full max-w-xs mb-3">
+    <div className="form-control w-full max-w-xs mb-1">
       {label && (
         <label className="label">
           <span className="label-text">{label}</span>
