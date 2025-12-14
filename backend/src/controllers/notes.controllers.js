@@ -11,9 +11,13 @@ const notesSchema = z.object({
 });
 
 export const createNotes = asyncHandler(async (req, res) => {
-  const notesData = notesSchema.safeParse(req.body);
+  const notesData = notesSchema.parse(req.body);
   if (!notesData.success) {
-    throw new ApiError(400, "Invalid note format", notesData.error.issues);
+    throw new ApiError(400, "Invalid note format", result.error.errors.map(e => ({
+      field: e.path[0],
+      message: e.message
+    }))
+);
   }
 
   const { title, content } = notesData.data;
@@ -67,7 +71,7 @@ export const updateNotes = asyncHandler(async (req, res) => {
   }
   const updateNotesSchema = notesSchema.partial();
 
-  const updateData = updateNotesSchema.safeParse(req.body);
+  const updateData = updateNotesSchema.parse(req.body);
 
   if (!updateData.success) {
     throw new ApiError(

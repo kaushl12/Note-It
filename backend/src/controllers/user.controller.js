@@ -95,8 +95,8 @@ export const login = asyncHandler(async (req, res) => {
 
   if (!loginData.success) {
     return res.status(400).json({
-      message: "Invalid Login data",
-      error: loginData.error.issues,
+      message: "Invalid login data",
+      error: loginData.error.issues
     });
   }
 
@@ -104,7 +104,6 @@ export const login = asyncHandler(async (req, res) => {
 
   const user = await User.findOne({ email });
 
-  // THIS IS CORRECT CHECK
   if (!user || !(await user.isPasswordCorrect(password))) {
     throw new ApiError(401, "Invalid email or password");
   }
@@ -116,19 +115,14 @@ export const login = asyncHandler(async (req, res) => {
     "-password -refreshToken"
   );
 
-  const options = {
-    httpOnly: true,
-    secure: true
-  };
-
   return res
     .status(200)
-    .cookie("accessToken", accessToken, options)
-    .cookie("refreshToken", refreshToken, options)
+    .cookie("accessToken", accessToken, { httpOnly: true, secure: true })
+    .cookie("refreshToken", refreshToken, { httpOnly: true, secure: true })
     .json(
       new ApiResponse(
         200,
-        { user: loggedInUser, accessToken, refreshToken },
+        { user: loggedInUser },
         "User Logged-In Successfully"
       )
     );
