@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { Link, useNavigate } from "react-router";
 import Input from "../components/Input";
+import PasswordInput from "../components/PasswordInput";
 import Button from "../components/Button";
-import { useNavigate } from "react-router";
-import { loginUser } from "../api/auth"; // make sure this exists
+import { loginUser } from "../api/auth";
+import RateLimitedUi from "../components/RateLimtedUi";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -35,7 +37,7 @@ const Login = () => {
 
     try {
       setLoading(true);
-      await loginUser({ email, password });
+      await loginUser(email, password);
       navigate("/");
     } catch (err) {
       const status = err.response?.status;
@@ -70,42 +72,60 @@ const Login = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-      <h1 className="text-3xl font-bold">Login</h1>
+    <div className="flex flex-col items-center justify-center  min-h-screen gap-4 bg-base-200">
+      <div className="card w-full flex flex-col items-center justify-center max-w-md bg-base-100 shadow-xl p-6 gap-4">
+        <h1 className="text-3xl font-bold text-center">Login</h1>
 
-      {rateLimited && (
-        <p className="text-red-500">
-          Too many attempts. Please wait and try again.
+        {rateLimited && <RateLimitedUi />}
+
+        {serverError && (
+          <div className="alert alert-error text-sm">
+            {serverError}
+          </div>
+        )}
+
+        <Input
+          label="Email"
+          type="email"
+          placeholder="you@example.com"
+          value={email}
+          error={emailError}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            setRateLimited(false);
+          }}
+        />
+
+        <PasswordInput
+          label="Password"
+          placeholder="Enter password"
+          value={password}
+          onChange={(e) => {
+            setPassword(e.target.value);
+            setRateLimited(false);
+          }}
+          error={passwordError}
+        />
+
+        <Button
+          text={
+            rateLimited
+              ? "Too many attempts"
+              : loading
+              ? "Logging in..."
+              : "Login"
+          }
+          onClick={handleLogin}
+          disabled={loading || rateLimited}
+        />
+
+        <p className="text-sm text-center">
+          Don’t have an account?{" "}
+          <Link to="/register" className="link link-primary">
+            Register
+          </Link>
         </p>
-      )}
-
-      {serverError && (
-        <p className="text-red-500">{serverError}</p>
-      )}
-
-      <Input
-        label="Email"
-        type="email"
-        placeholder="Enter email"
-        value={email}
-        error={emailError}
-        onChange={(e) => setEmail(e.target.value)}
-      />
-
-      <Input
-        label="Password"
-        type="password"
-        placeholder="Enter password"
-        value={password}
-        error={passwordError}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-
-      <Button
-        text={loading ? "Logging in..." : "Login"}
-        onClick={handleLogin}
-        disabled={loading}
-      />
+      </div>
     </div>
   );
 };

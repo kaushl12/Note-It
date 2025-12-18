@@ -4,6 +4,7 @@ import Button from "../components/Button";
 import { registerUser } from "../api/auth";
 import RateLimtedUi from './../components/RateLimtedUi';
 import { useNavigate } from 'react-router';
+import PasswordInput from "../components/PasswordInput";
 const Register = () => {
   // form state
   const [email, setEmail] = useState("");
@@ -70,23 +71,25 @@ const Register = () => {
       )}
 
       {/* EMAIL INPUT */}
-      <Input
-  label="Email"
-  type="email"
-  placeholder="Enter email"
-  value={email}
-  onChange={(e) => setEmail(e.target.value)}
-  error={emailError}
-/>
+ <Input
+        label="Email"
+        type="email"
+        placeholder="you@example.com"
+        value={email}
+        error={emailError}
+        onChange={(e) => setEmail(e.target.value)}
+      />
 
-<Input
-  label="Password"
-  type="password"
-  placeholder="Enter password"
-  value={password}
-  onChange={(e) => setPassword(e.target.value)}
-  error={passwordError}
-/>
+     
+      <PasswordInput
+            label="Password"
+            value={password}
+        placeholder="Enter password"
+            onChange={(e) => setPassword(e.target.value)}
+            error={passwordError}
+          />
+
+
 
       {/* BUTTON */}
       <Button text="Register" onClick={handleRegister} />
