@@ -11,14 +11,18 @@ const notesSchema = z.object({
 });
 
 export const createNotes = asyncHandler(async (req, res) => {
-  const notesData = notesSchema.parse(req.body);
-  if (!notesData.success) {
-    throw new ApiError(400, "Invalid note format", result.error.errors.map(e => ({
+  const notesData = notesSchema.safeParse(req.body);
+
+if (!notesData.success) {
+  throw new ApiError(
+    400,
+    "Invalid note format",
+    notesData.error.errors.map(e => ({
       field: e.path[0],
-      message: e.message
+      message: e.message,
     }))
-);
-  }
+  );
+}
 
   const { title, content } = notesData.data;
   const userId = req.user?._id;
@@ -50,11 +54,10 @@ export const getAllNotes = asyncHandler(async (req, res) => {
       new ApiResponse(200, [], "No notes found")
     );
   }
-  return res
-  .status(200)
-  .json(
-    new ApiResponse(200,allNotes,"Notes Fetched Successfully")
-  )
+ return res.status(200).json(
+  new ApiResponse(200, { notes: allNotes }, "Notes Fetched Successfully")
+);
+
 });
 
 export const updateNotes = asyncHandler(async (req, res) => {

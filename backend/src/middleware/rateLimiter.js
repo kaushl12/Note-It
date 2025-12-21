@@ -15,7 +15,7 @@ export const authLimiter = rateLimit({
 // ---------------- PER-USER NOTE LIMITER ----------------
 export const noteLimiter = rateLimit({
   windowMs: 1 * 60 * 1000,  // 1 minute
-  max: 100,                   // For testing
+  max: 30,                   // For testing
   message: {
     success: false,
     message: "Too many requests. Please slow down."
