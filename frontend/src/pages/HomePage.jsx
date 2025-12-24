@@ -13,14 +13,16 @@ const HomePage = () => {
   useEffect(() => {
     const fetchNotes = async () => {
       try {
-        const res = await axios.get(
-          "http://localhost:5001/api/notes/all",
-          { withCredentials: true }
-        );
+        const res = await axios.get("http://localhost:5001/api/notes/all", {
+          withCredentials: true,
+        });
 
+         const safeNotes = Array.isArray(res.data.data?.notes)
+        ? res.data.data.notes
+        : [];
 
-        setNotes(res.data.data.notes);
-        setIsRateLimited(false);
+      setNotes(safeNotes);
+      setIsRateLimited(false);
       } catch (error) {
         const status = error?.response?.status;
 
@@ -46,21 +48,17 @@ const HomePage = () => {
 
       <div className="max-w-7xl mx-auto p-4 mt-6">
         {loading && (
-          <div className="text-center text-primary py-10">
-            Loading...
-          </div>
+          <div className="text-center text-primary py-10">Loading...</div>
         )}
 
         {notes.length === 0 && !loading && !isRateLimited && (
-          <p className="text-center opacity-70">
-            No notes found.
-          </p>
+          <p className="text-center opacity-70">No notes found.</p>
         )}
 
         {notes.length > 0 && !isRateLimited && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {notes.map((note) => (
-              <NoteCard key={note._id} note={note}/>
+              <NoteCard key={note._id} note={note} />
             ))}
           </div>
         )}

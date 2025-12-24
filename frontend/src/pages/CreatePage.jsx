@@ -1,14 +1,32 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeftIcon } from "lucide-react";
+import { toast } from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
+import api from "../api/axiosInstance";
 const CreatePage = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const handleSubmit = (e) => {
+const navigate=useNavigate()
+  const handleSubmit = async(e) => {
     e.preventDefault();
-    console.log(title,content);
+    if(!title.trim() || !content.trim()){
+      toast.error("All Fields are required")
+      return; 
+    }
+    setLoading(true)
+    try {
+     api.post("/notes/create", { title, content });
+        toast.success("Note created Successfully")
+        navigate("/")
+    } catch (error) {
+      console.log("Error while creating note",error);
+      
+      toast.error("Failed to create Note")
+    }finally{
+      setLoading(false)
+    }
     
   };
   return (
