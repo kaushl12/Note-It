@@ -17,11 +17,8 @@ if (!notesData.success) {
   throw new ApiError(
     400,
     "Invalid note format",
-    notesData.error.errors.map(e => ({
-      field: e.path[0],
-      message: e.message,
-    }))
-  );
+    notesData.error.issues,
+    )
 }
 
   const { title, content } = notesData.data;
@@ -74,7 +71,7 @@ export const updateNotes = asyncHandler(async (req, res) => {
   }
   const updateNotesSchema = notesSchema.partial();
 
-  const updateData = updateNotesSchema.parse(req.body);
+  const updateData = updateNotesSchema.safeParse(req.body);
 
   if (!updateData.success) {
     throw new ApiError(

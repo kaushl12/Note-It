@@ -18,7 +18,7 @@ router.use(verifyJwt);
 // Apply limiter PER ROUTE (correct)
 router.route("/create").post(noteLimiter, createNotes);
 router.route("/all").get(noteLimiter, getAllNotes);
-router.route("/update/:noteId").patch(noteLimiter, updateNotes);
+router.route("/update/:noteId").put(noteLimiter, updateNotes);
 router.route("/delete/:noteId").delete(noteLimiter, deleteNotes);
 router.route("/get/:noteId").get(noteLimiter, getNote);
 

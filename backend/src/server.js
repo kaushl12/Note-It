@@ -10,7 +10,7 @@ dotenv.config()
 
 app.use(
   cors({
-    origin:process.env.CORS_ORIGIN,
+    origin:[process.env.CORS_ORIGIN,"http://10.42.162.70:5173"],
     credentials:true
   })
 )

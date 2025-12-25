@@ -92,18 +92,16 @@ export const register = asyncHandler(async (req, res) => {
 
 export const login = asyncHandler(async (req, res) => {
   const loginData = registerSchema.safeParse(req.body);
+  const isProd = process.env.NODE_ENV === "production";
+
 
   if (!loginData.success) {
-    return res.status(400).json({
-      message: "Invalid login data",
-      error: loginData.error.issues
-    });
+    throw new ApiError(400, "Invalid login data", loginData.error.issues);
   }
 
   const { email, password } = loginData.data;
 
   const user = await User.findOne({ email });
-
   if (!user || !(await user.isPasswordCorrect(password))) {
     throw new ApiError(401, "Invalid email or password");
   }
@@ -115,10 +113,17 @@ export const login = asyncHandler(async (req, res) => {
     "-password -refreshToken"
   );
 
+  const cookieOptions = {
+    httpOnly: true,
+    secure: isProd,                 // 🔴 FIX
+    sameSite: isProd ? "none" : "lax", // 🔴 FIX
+    maxAge: 3 * 24 * 60 * 60 * 1000,
+  };
+
   return res
     .status(200)
-    .cookie("accessToken", accessToken, { httpOnly: true, secure: true })
-    .cookie("refreshToken", refreshToken, { httpOnly: true, secure: true })
+    .cookie("accessToken", accessToken, cookieOptions)
+    .cookie("refreshToken", refreshToken, cookieOptions)
     .json(
       new ApiResponse(
         200,
@@ -154,9 +159,8 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
   const incomingRefreshToken =
     req.cookies?.refreshToken || req.body?.refreshToken;
 
-  // 1. No refresh token -> unauthorized
   if (!incomingRefreshToken) {
-    throw new ApiError(401, "Unauthorized request: Refresh token missing");
+    throw new ApiError(401, "Refresh token missing");
   }
 
   let decoded;
@@ -165,42 +169,45 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
       incomingRefreshToken,
       process.env.REFRESH_TOKEN_SECRET
     );
-  } catch (err) {
-    throw new ApiError(401, "Refresh token is invalid or expired");
+  } catch {
+    throw new ApiError(401, "Refresh token invalid or expired");
   }
 
-  // 2. User must exist
-  const user = await User.findById(decoded?._id);
-  if (!user) {
-    throw new ApiError(401, "Refresh token does not match any user");
+  const user = await User.findById(decoded._id);
+  if (!user || incomingRefreshToken !== user.refreshToken) {
+    throw new ApiError(401, "Invalid refresh token");
   }
 
-  // 3. Token must match stored refresh token
-  if (incomingRefreshToken !== user.refreshToken) {
-    throw new ApiError(401, "Refresh token expired or already used");
-  }
-
-  // 4. Generate new tokens
   const { accessToken, refreshToken } =
-    await generateRefreshAndAccessTokens(user._id);
+    await generateRefreshAndAccessTokens(user);
 
-  // 5. Cookie options
-  const options = {
+  const cookieOptions = {
     httpOnly: true,
-    secure: true,
-    sameSite: "none", // for frontend working across domains
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    secure: isProd,                 // 🔴 FIX
+    sameSite: isProd ? "none" : "lax", // 🔴 FIX
+    maxAge: 7 * 24 * 60 * 60 * 1000,
   };
 
   return res
     .status(200)
-    .cookie("accessToken", accessToken, options)
-    .cookie("refreshToken", refreshToken, options)
+    .cookie("accessToken", accessToken, cookieOptions)
+    .cookie("refreshToken", refreshToken, cookieOptions)
     .json(
       new ApiResponse(
         200,
-        { accessToken, refreshToken },
+        { userId: user._id },
         "Access token refreshed successfully"
       )
     );
 });
+
+export const getMe=asyncHandler(async(req,res)=>{
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      req.user,
+      "User fetched Successfully"
+    )
+  )
+})
+
