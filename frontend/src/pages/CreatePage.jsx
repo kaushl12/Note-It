@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeftIcon } from "lucide-react";
 import { toast } from 'react-hot-toast';
@@ -8,7 +8,11 @@ const CreatePage = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
+  const inputRef=useRef(null)
 const navigate=useNavigate()
+useEffect(()=>{
+  inputRef.current?.focus()
+},[])
   const handleSubmit = async(e) => {
     e.preventDefault();
     if(!title.trim() || !content.trim()){
@@ -17,13 +21,20 @@ const navigate=useNavigate()
     }
     setLoading(true)
     try {
-     api.post("/notes/create", { title, content });
+     await api.post("/notes/create", { title, content });
         toast.success("Note created Successfully")
         navigate("/")
     } catch (error) {
       console.log("Error while creating note",error);
-      
-      toast.error("Failed to create Note")
+      if(error.response.status===429){
+        toast.error("Slow down! You're creating notes too fast",{
+          duration:4000,
+          icon:"⚠️"
+        })
+      }else{
+
+        toast.error("Failed to create Note")
+      }
     }finally{
       setLoading(false)
     }
@@ -51,7 +62,9 @@ const navigate=useNavigate()
                   placeholder="Note Title"
                   className="input input-bordered" 
                   value={title}
-                  onChange={(e)=> setTitle(e.target.value)}/>
+                  onChange={(e)=> setTitle(e.target.value)}
+                  ref={inputRef}
+                  />
                   
                 </div>
                 <div className="form-control mb-4">

@@ -4,6 +4,7 @@ import RateLimtedUi from "../components/RateLimtedUi";
 import axios from "axios";
 import toast from "react-hot-toast";
 import NoteCard from "../components/NoteCard";
+import NotesNotFound from "../components/NotesNotFound";
 
 const HomePage = () => {
   const [isRateLimited, setIsRateLimited] = useState(false);
@@ -17,9 +18,7 @@ const HomePage = () => {
           withCredentials: true,
         });
 
-         const safeNotes = Array.isArray(res.data.data?.notes)
-        ? res.data.data.notes
-        : [];
+         const safeNotes = Array.isArray(res.data.data?.notes)? res.data.data.notes : [];
 
       setNotes(safeNotes);
       setIsRateLimited(false);
@@ -41,6 +40,10 @@ const HomePage = () => {
     fetchNotes();
   }, []);
 
+  const handleNoteDelete=(deletedId)=>{
+    setNotes((prevNotes)=>prevNotes.filter((note)=>note._id !== deletedId))
+  }
+
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -51,14 +54,12 @@ const HomePage = () => {
           <div className="text-center text-primary py-10">Loading...</div>
         )}
 
-        {notes.length === 0 && !loading && !isRateLimited && (
-          <p className="text-center opacity-70">No notes found.</p>
-        )}
+        {notes.length === 0 && !loading && !isRateLimited && <NotesNotFound/>}
 
         {notes.length > 0 && !isRateLimited && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {notes.map((note) => (
-              <NoteCard key={note._id} note={note} />
+              <NoteCard key={note._id} note={note} onDelete={handleNoteDelete } />
             ))}
           </div>
         )}
