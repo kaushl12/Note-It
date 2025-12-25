@@ -15,5 +15,5 @@ export const loginUser = async ( email, password) => {
 };
 
 export const logout=()=>{
-   api.post("/auth/logout");
+   api.post("/user/logout");
 }
