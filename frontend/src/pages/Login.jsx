@@ -50,17 +50,19 @@ const Login = () => {
       }
 
       // ZOD FIELD ERRORS (400)
-      if (status === 400 && Array.isArray(data?.error)) {
-        data.error.forEach((e) => {
-          if (e.path?.[0] === "email") setEmailError(e.message);
-          if (e.path?.[0] === "password") setPasswordError(e.message);
+      // ZOD EMAIL ERRORS ONLY
+      if (status === 400 && Array.isArray(data?.errors)) {
+        data.errors.forEach((e) => {
+          if (e.path?.[0] === "email") {
+            setEmailError(e.message);
+          }
         });
         return;
       }
 
-      // AUTH ERROR (401)
+      // AUTH ERROR
       if (status === 401) {
-        setServerError(data?.message || "Invalid email or password");
+        setServerError("Invalid email or password");
         return;
       }
 
@@ -72,16 +74,24 @@ const Login = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center  min-h-screen gap-4 bg-base-200">
-      <div className="card w-full flex flex-col items-center justify-center max-w-md bg-base-100 shadow-xl p-6 gap-4">
-        <h1 className="text-3xl font-bold text-center">Login</h1>
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-base-200">
+       {/* APP HEADING */}
+    <div className="mb-6 text-center">
+      <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight">
+        <span className="text-primary">Note-It</span> 📝
+      </h1>
+      <p className="mt-2 text-sm sm:text-base opacity-70">
+        Capture your thoughts. Anytime. Anywhere.
+      </p>
+    </div>
+    
+      <div className="card w-full flex flex-col items-center justify-center max-w-md bg-base-100 shadow-xl p-4 gap-4">
+        <h1 className="text-2xl font-bold text-center">Login</h1>
 
         {rateLimited && <RateLimitedUi />}
 
         {serverError && (
-          <div className="alert alert-error text-sm">
-            {serverError}
-          </div>
+          <div className="alert alert-error text-sm">{serverError}</div>
         )}
 
         <Input
@@ -119,9 +129,9 @@ const Login = () => {
           disabled={loading || rateLimited}
         />
 
-        <p className="text-sm text-center">
+        <p className="text-sm text-center mb-3">
           Don’t have an account?{" "}
-          <Link to="/register" className="link link-primary">
+          <Link to="/register" className="link link-primary font-medium">
             Register
           </Link>
         </p>
