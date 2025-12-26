@@ -48,7 +48,7 @@ const registerSchema = z.object({
   password: z
     .string()
     .trim()
-    .min(6)
+    .min(6,"Password must be of 6 characters")
     .max(100)
     .regex(/[0-9]/, "Must contain at least one digit")
     .regex(/[A-Z]/, "Must contain at least one uppercase letter")
@@ -61,11 +61,12 @@ export const register = asyncHandler(async (req, res) => {
   const validatedData = registerSchema.safeParse(req.body);
 
   if (!validatedData.success) {
-    return res.status(400).json({
-      message: "Invalid registration data format",
-      error: validatedData.error.issues,
-    });
-  }
+  return res.status(400).json({
+    message: "Validation failed",
+    errors: validatedData.error.issues, // 🔴 standardized key
+  });
+}
+
   const { email, password } = validatedData.data;
 
   const existedUser = await User.findOne({
@@ -89,15 +90,25 @@ export const register = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, createdUser, "User registration Successfully"));
 });
-
+const loginSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Invalid email format"),
+  password: z.string().min(1, "Password is required"),
+});
 export const login = asyncHandler(async (req, res) => {
-  const loginData = registerSchema.safeParse(req.body);
+  const loginData = loginSchema.safeParse(req.body);
   const isProd = process.env.NODE_ENV === "production";
 
 
   if (!loginData.success) {
-    throw new ApiError(400, "Invalid login data", loginData.error.issues);
-  }
+  return res.status(400).json({
+    message: "Invalid login data",
+    errors: loginData.error.issues,
+  });
+}
 
   const { email, password } = loginData.data;
 

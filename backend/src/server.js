@@ -32,14 +32,13 @@ app.use("/api/user/", userRouter);
 
 
 app.use((err, req, res, next) => {
-  console.error(err);
-
   return res.status(err.statusCode || 500).json({
     success: false,
-    message: err.message || "Internal server error",
+    message: err.message,
     errors: err.errors || [],
   });
 });
+
 app.listen(port, () => {
   console.log("Hello sever started on port",port);
 });
