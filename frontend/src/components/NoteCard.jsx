@@ -5,6 +5,7 @@ import { formatDate } from "../lib/utils";
 import api from "../api/axiosInstance";
 import toast from "react-hot-toast";
 import DeleteModal from "./DeleteModal";
+import { apiRequest } from "../api/apiRequest";
 
 const NoteCard = ({ note, onDelete }) => {
   const [openModal, setOpenModal] = useState(false);
@@ -14,7 +15,9 @@ const NoteCard = ({ note, onDelete }) => {
   const handleDelete = async () => {
     try {
       setLoading(true);
-      await api.delete(`/notes/delete/${note._id}`);
+      await apiRequest(()=>
+        api.delete(`/notes/delete/${note._id}`)
+      )
       onDelete(note._id);
       toast.success("Note deleted successfully");
       setOpenModal(false);

@@ -6,11 +6,16 @@ import NotedetailPage from "./pages/NotedetailPage";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import ProtectedRoutes from "./context/ProtectedRoutes";
+import My404Component from "./components/My404Component";
 
 const App = () => {
   return (
     <div data-theme="night">
       <Routes>
+       
+
+        <Route path="*" element={<My404Component />} />
+
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route

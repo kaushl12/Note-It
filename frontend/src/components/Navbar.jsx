@@ -1,15 +1,15 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { PlusIcon, UserCog } from "lucide-react";
-import api from "../api/axiosInstance";
 import { logout } from "../api/auth";
+import { apiRequest } from "../api/apiRequest";
 
 const Navbar = () => {
     const navigate=useNavigate()
 
     const handleLogout=async()=>{
         try {
-            await logout();
+            await apiRequest(() => {logout()} )
             navigate('/login')
         } catch (error) {
             

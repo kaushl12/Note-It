@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "../api/axiosInstance";
 import { ArrowLeftIcon, LoaderIcon, Trash2Icon } from "lucide-react";
 import DeleteModal from "../components/DeleteModal";
+import { apiRequest } from "../api/apiRequest";
 
 const NotedetailPage = () => {
   const [notes, setNotes] = useState(null);
@@ -18,7 +19,10 @@ const NotedetailPage = () => {
   const handleDelete = async () => {
     try {
       setLoading(true);
-      await api.delete(`/notes/delete/${id}`);
+      await apiRequest(()=>
+
+         api.delete(`/notes/delete/${id}`)
+    )
       toast.success("Note deleted successfully");
       navigate("/");
       setOpenModal(false);
@@ -35,7 +39,10 @@ const NotedetailPage = () => {
     }
     setSaving(true);
     try {
-      await api.put(`/notes/update/${id}`, notes);
+
+      await apiRequest(()=>
+         api.put(`/notes/update/${id}`, notes)
+      )
       toast.success("Notes Updated successfully");
       navigate("/");
     } catch (error) {
@@ -68,7 +75,7 @@ useEffect(() => {
   fetchNotes();
 }, [id]);
 
-  console.log("NOtes", notes);
+  // console.log("NOtes", notes);
   if (loading) {
     return (
       <div className="min-h-screen bg-base-200 flex items-center justify-center">

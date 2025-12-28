@@ -4,6 +4,7 @@ import { ArrowLeftIcon } from "lucide-react";
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import api from "../api/axiosInstance";
+import { apiRequest } from "../api/apiRequest";
 const CreatePage = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -20,24 +21,34 @@ useEffect(()=>{
       return; 
     }
     setLoading(true)
-    try {
-     await api.post("/notes/create", { title, content });
-        toast.success("Note created Successfully")
-        navigate("/")
-    } catch (error) {
-      console.log("Error while creating note",error);
-      if(error.response.status===429){
-        toast.error("Slow down! You're creating notes too fast",{
-          duration:4000,
-          icon:"⚠️"
-        })
-      }else{
+  try {
+  await apiRequest(() =>
+    api.post("/notes/create", { title, content })
+  );
 
-        toast.error("Failed to create Note")
-      }
-    }finally{
-      setLoading(false)
-    }
+  toast.success("Note created Successfully");
+  navigate("/");
+} catch (error) {
+  console.log("Error while creating note", error);
+
+  const status = error.response?.status;
+
+  if (status === 429) {
+    toast.error("Slow down! You're creating notes too fast", {
+      duration: 4000,
+      icon: "⚠️",
+    });
+  } else if (status === 401) {
+    // refresh already failed → session expired
+    toast.error("Session expired. Please login again.");
+    navigate("/login");
+  } else {
+    toast.error("Failed to create Note");
+  }
+} finally {
+  setLoading(false);
+}
+
     
   };
   return (

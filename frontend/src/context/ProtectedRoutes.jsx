@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import api from "../api/axiosInstance";
+import { apiRequest } from "../api/apiRequest";
 
 const ProtectedRoute = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(null); // null = checking
@@ -8,7 +9,9 @@ const ProtectedRoute = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        await api.get("/user/me"); // protected API
+        await apiRequest(()=>
+           api.get("/user/me") // protected API
+        )
         setIsAuthenticated(true);
       } catch (error) {
         setIsAuthenticated(false);
