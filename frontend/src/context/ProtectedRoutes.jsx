@@ -4,14 +4,12 @@ import api from "../api/axiosInstance";
 import { apiRequest } from "../api/apiRequest";
 
 const ProtectedRoute = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(null); // null = checking
+  const [isAuthenticated, setIsAuthenticated] = useState(null);
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        await apiRequest(()=>
-           api.get("/user/me") // protected API
-        )
+        await apiRequest(() => api.get("/user/me"));
         setIsAuthenticated(true);
       } catch (error) {
         setIsAuthenticated(false);
@@ -20,8 +18,6 @@ const ProtectedRoute = ({ children }) => {
 
     checkAuth();
   }, []);
-
-  // ⏳ While checking auth
   if (isAuthenticated === null) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -30,12 +26,10 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
-  // 🔒 Not authenticated
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  // ✅ Authenticated
   return children;
 };
 

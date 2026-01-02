@@ -26,11 +26,11 @@ const Login = () => {
     setRateLimited(false);
 
     // client-side validation
-    if (!email) {
+    if (!email.trim()) {
       setEmailError("Email is required");
       return;
     }
-    if (!password) {
+    if (!password.trim()) {
       setPasswordError("Password is required");
       return;
     }

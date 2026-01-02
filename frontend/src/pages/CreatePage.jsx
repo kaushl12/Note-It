@@ -29,7 +29,7 @@ useEffect(()=>{
   toast.success("Note created Successfully");
   navigate("/");
 } catch (error) {
-  console.log("Error while creating note", error);
+  // console.log("Error while creating note", error);
 
   const status = error.response?.status;
 
